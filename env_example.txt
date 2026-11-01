@@ -1,0 +1,109 @@
+# =====================================================================================
+#  Chitti settings.   Copy this file to a file named  .env  (same folder) and edit it.
+#  NEVER share your .env file or paste its contents anywhere: it can hold secret keys.
+#  Lines starting with # are comments. Remove the # to use a setting.
+# =====================================================================================
+
+# ------------------------------- AI BRAIN (who answers your questions) -------------------
+# auto      = the first of: Claude (if ANTHROPIC_API_KEY is set), OpenAI-compatible (if OPENAI_API_KEY and
+#             OPENAI_MODEL are set), then Ollama on this PC. Chitti prints which one it uses when it starts.
+#             Easiest: run  python chitti.py --setup  and answer the questions: it fills these in for you.
+# ollama / anthropic / openai = use exactly that one.   none = commands only, no chatting.
+LLM_PROVIDER=auto
+# Optional: extra providers tried only if the main one fails (comma separated), e.g. ollama
+LLM_FALLBACK=
+
+# --- Option A: Ollama  (FREE, runs on this PC, works offline, but slow on an old CPU)
+#     1) install Ollama from ollama.com   2) run:  ollama pull llama3.2:3b
+OLLAMA_HOST=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.2:3b
+
+# --- Option B: Claude API  (PAID, billed by how much you use; needs internet)
+#     Get a key at console.anthropic.com. Check current model names and prices on Anthropic's website.
+ANTHROPIC_API_KEY=
+ANTHROPIC_MODEL=claude-haiku-5-5
+
+# --- Option C: any OpenAI-compatible API (OpenAI, Groq, Google Gemini's compatible endpoint, OpenRouter...)
+#     Some of these offer a FREE tier with limits that change often: check their website before relying on it.
+#     Examples of OPENAI_BASE_URL:  https://api.openai.com/v1
+#                                   https://api.groq.com/openai/v1
+#                                   https://generativelanguage.googleapis.com/v1beta/openai
+OPENAI_API_KEY=
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=
+OPENAI_FREE_TIER=false
+
+LLM_MAX_TOKENS=300          # longest normal answer (about 200 words). "Explain in detail" allows 3x.
+LLM_TIMEOUT=30              # seconds to wait for the AI before giving up
+LLM_RETRIES=1               # extra tries when the network hiccups
+HISTORY_TURNS=8             # how many recent turns she remembers (more = more cost and delay)
+HISTORY_IDLE_MINUTES=15     # she forgets the conversation after this long without talking
+
+# ------------------------------------- VOICE ---------------------------------------------
+# auto = Edge neural voice (free, natural, needs internet) -> Piper (offline, English) -> Windows voice (offline).
+# Or choose one: edge | piper | windows
+TTS_ENGINE=auto
+# Female voices. List all voices with:  python -m edge_tts --list-voices
+#   English (India): en-IN-NeerjaNeural, en-IN-NeerjaExpressiveNeural     (male: en-IN-PrabhatNeural)
+#   English (US/UK): en-US-AriaNeural, en-US-JennyNeural, en-GB-SoniaNeural
+#   Telugu:          te-IN-ShrutiNeural                                    (male: te-IN-MohanNeural)
+TTS_VOICE_EN=en-IN-NeerjaNeural
+TTS_VOICE_TE=te-IN-ShrutiNeural
+SPEECH_SPEED=1.0            # 0.8 = slower, 1.2 = faster
+SPEECH_PITCH_HZ=0           # e.g. -5 for a slightly deeper voice, 5 for higher
+VOICE_VOLUME=1.0            # 0.0 to 1.5
+SENTENCE_GAP_MS=140         # natural pause between sentences
+OUTPUT_DEVICE=              # speaker number from: python chitti.py --mics   (empty = default)
+# Offline neural voice (optional): install with  pip install piper-tts , download a voice, then give its .onnx path
+#   python -m piper.download_voices en_US-lessac-medium
+PIPER_MODEL=
+WINDOWS_VOICE=              # part of a Windows voice name, e.g. Zira (used only by the Windows fallback voice)
+
+# ----------------------------------- LISTENING -------------------------------------------
+# tiny.en (fastest) < base.en < small.en < medium.en (best, slowest).  Telugu needs a model without ".en": small
+WHISPER_MODEL=base.en
+STT_LANGUAGE=en             # en or te (you can also say "speak in Telugu" while talking)
+MIC_DEVICE=                 # microphone number from: python chitti.py --mics   (empty = default)
+MIC_SENSITIVITY=1.0         # raise (1.5, 2.0) if she misses quiet speech; lower (0.7) in a noisy room
+SILENCE_TIMEOUT=0.55        # seconds of quiet that end your sentence. Lower = quicker, higher = fewer cut-offs
+MIN_CONFIDENCE=0.50         # below this she asks you to repeat
+
+# ------------------------------------- SPEED ---------------------------------------------
+# Where the time goes after you stop talking:  waiting to be sure you finished (SILENCE_TIMEOUT)
+#   + recognising your words + the AI starting its answer + the voice making the first sentence.
+# Start recognising your words slightly before she is sure you finished (the result is thrown away if you continue)
+SPECULATIVE_STT=true
+SPEC_AFTER_SECONDS=0.25
+# After a computer command she can:  voice = say what she did | tone = just a short beep (fastest) | none = silent
+# (she always does the thing FIRST and says it afterwards)
+COMMAND_FEEDBACK=voice
+FIRST_CHUNK_CHARS=45        # she starts speaking when the first clause of the answer is this long
+FILLER_AFTER_SECONDS=0.9    # if the AI is slower than this she says "Hmm." or "Let me think." like a person would
+# On a slow PC the biggest delay is local speech recognition. A fast online service (for example Groq's hosted
+# Whisper, which has a free tier) fixes that. Run  python chitti.py --setup  to set it up, or fill these in.
+# PRIVACY: audio is sent there ONLY after you have said her name and a conversation is open. While she waits for
+# her name everything stays on your PC.  Switch off with STT_ENGINE=local.
+STT_ENGINE=local            # local | cloud
+STT_BASE_URL=https://api.groq.com/openai/v1
+STT_API_KEY=
+STT_MODEL=whisper-large-v3-turbo
+STT_TIMEOUT=10
+STT_VAD=true                # false is slightly faster but lets more noise through
+
+# ---------------------------------- CONVERSATION -----------------------------------------
+CONVERSATION_MODE=continuous   # continuous = keep listening after "chitti" | wake = say "chitti" every time
+CONVERSATION_IDLE_SECONDS=20   # the conversation closes after this much quiet
+# Interrupting her while she talks:  off | speaker (laptop speakers, echo-aware) | headphones (most sensitive)
+BARGE_IN=speaker
+BARGE_IN_MS=450             # how long you must speak to interrupt her
+BEEP=true                   # small beep when she hears her name
+
+# ------------------------------------ PRIVACY --------------------------------------------
+# Your words are NOT written to chitti.log unless you set this to true. Audio is never saved.
+LOG_TRANSCRIPTS=false
+
+# ------------------------------------- OTHER ---------------------------------------------
+WAKE_WORD=chitti
+WAKE_EXTRA=                 # more spellings she might hear for the wake word, comma separated
+CONTACTS=                   # WhatsApp: name:number,name:number   (empty number = search by name)  e.g. mom:919876543210,ravi:
+DATE_ORDER=dmy              # how she reads 03/04/2026: dmy (3 April) or mdy (March 4)

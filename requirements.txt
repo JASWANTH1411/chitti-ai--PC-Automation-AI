@@ -1,0 +1,10 @@
+# Chitti needs Python 3.10 or newer on Windows.   Install everything with:   pip install -r requirements.txt
+faster-whisper      # speech recognition (Whisper)
+sounddevice         # microphone and speaker
+pyautogui           # keyboard/screen actions
+numpy
+edge-tts            # natural neural voices (free, needs internet)
+miniaudio           # plays the voice audio
+
+# Optional: offline neural English voice (see PIPER_MODEL in .env.example)
+# piper-tts
